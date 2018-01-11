@@ -1,0 +1,25 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "request": "launch",
+            "type": "java",
+            "name": "java",
+            "stopOnEntry": false,
+            "cwd": "${workspaceRoot}",
+
+            "console": "internalConsole",
+            
+            "mainClass": "br.com.monitoring.wls.CompleteWebLogicMonitoring",
+              
+            "sourcePaths": ["${workspaceRoot}/src/java"],       // Indicates where your source (.java) files are
+            "classPaths": ["${workspaceRoot}/target/final.jar"],        // Indicates the location of your .class files
+            
+
+        },
+    ]
+}
