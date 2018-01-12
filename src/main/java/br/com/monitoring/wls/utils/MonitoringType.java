@@ -20,6 +20,8 @@ public enum MonitoringType {
         THREAD_POOL("ThreadPoolRuntime.dat", new String[] { "CompletedRequestCount", "ExecuteThreadTotalCount", "ExecuteThreadIdleCount", "HoggingThreadCount",
                 "PendingUserRequestCount", "QueueLength", "StandbyThreadCount", "Throughput" }),
 
+        EXECUTE_THREAD("ExecuteThread.dat", new String[] { "Name", "ModuleName", "Standby", "Hogger", "Stuck"}),
+
         SERVER_JDBC("JDBCDataSourceRuntimeMBeans.dat", new String[] { "Name", "ActiveConnectionsCurrentCount", "WaitSecondsHighCount",
                 "WaitingForConnectionCurrentCount", "WaitingForConnectionFailureTotal", "WaitingForConnectionTotal", "WaitingForConnectionHighCount" }),
 

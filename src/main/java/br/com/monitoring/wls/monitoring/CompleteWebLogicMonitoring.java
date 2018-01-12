@@ -1,15 +1,12 @@
 package br.com.monitoring.wls.monitoring;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanServerConnection;
@@ -17,6 +14,8 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+
+import weblogic.management.runtime.ExecuteThread;
 
 import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.utils.MonitoringType;
@@ -41,14 +40,14 @@ public class CompleteWebLogicMonitoring {
 
     private CompleteWebLogicMonitoring(String... a) throws IOException, MalformedURLException {
 
-        host = a[1];
-        port = a[2];
-        user = a[3];
-        pass = a[4];
-        path = a[5];
-        consId = a[6];
-        sistName = a[7];
-        hasHeader = Integer.valueOf(a[8]) == 1 ? true : false;
+        host = a[0];
+        port = a[1];
+        user = a[2];
+        pass = a[3];
+        path = a[4];
+        consId = a[5];
+        sistName = a[6];
+        hasHeader = Integer.valueOf(a[7]) == 1 ? true : false;
 
         JMXServiceURL serviceURL = new JMXServiceURL(Constant.PROTOCOL_T3, host, Integer.valueOf(port), Constant.JNDI);
 
@@ -66,7 +65,7 @@ public class CompleteWebLogicMonitoring {
         Date localDate = new Date();
 
         if (hasHeader) {
-            Util.write(type.filename, Util.concat(type.strArray, Constant.INIT_HEADER));
+            Util.write(Util.buildName(path, host, port, type.filename), Util.concat(type.strArray, Constant.INIT_HEADER));
         }
 
         ObjectName domain = getDomainConfiguration();
@@ -77,9 +76,8 @@ public class CompleteWebLogicMonitoring {
             ObjectName serverStart = (ObjectName) connection.getAttribute(servers, "ServerStart");
 
             if (address != null) {
-                Util.write(Util.buildName(path, host, port, type.filename),
-                        Util.concat(getInfo(type.strArray, serverStart), consId, sistName, Util.formatDate(localDate),
-                                Util.formatHost(address), name));
+                Util.write(Util.buildName(path, host, port, type.filename), Util.concat(getInfo(type, serverStart),
+                        consId, sistName, Util.formatDate(localDate), Util.formatHost(address), name));
             }
         }
     }
@@ -89,7 +87,7 @@ public class CompleteWebLogicMonitoring {
         Date localDate = new Date();
 
         if (hasHeader) {
-            Util.write(type.filename, Util.concat(type.strArray, Constant.INIT_HEADER));
+            Util.write(Util.buildName(path, host, port, type.filename), Util.concat(type.strArray, Constant.INIT_HEADER));
         }
 
         for (ObjectName serverRuntimes : getServerRuntimes()) {
@@ -102,9 +100,8 @@ public class CompleteWebLogicMonitoring {
 
             for (ObjectName jdbcDataSource : jdbcDataSourceArray) {
 
-                Util.write(Util.buildName(path, host, port, type.filename),
-                        Util.concat(getInfo(type.strArray, jdbcDataSource), consId, sistName,
-                                Util.formatDate(localDate), Util.formatHost(adress), name));
+                Util.write(Util.buildName(path, host, port, type.filename), Util.concat(getInfo(type, jdbcDataSource),
+                        consId, sistName, Util.formatDate(localDate), Util.formatHost(adress), name));
 
             }
         }
@@ -115,7 +112,7 @@ public class CompleteWebLogicMonitoring {
         Date localDate = new Date();
 
         if (hasHeader) {
-            Util.write(type.filename, Util.concat(type.strArray, Constant.INIT_HEADER));
+            Util.write(Util.buildName(path, host, port, type.filename), Util.concat(type.strArray, Constant.INIT_HEADER));
         }
 
         for (ObjectName serverRuntimes : getServerRuntimes()) {
@@ -123,8 +120,8 @@ public class CompleteWebLogicMonitoring {
             String adress = (String) connection.getAttribute(serverRuntimes, "ListenAddress");
             ObjectName jvmRuntime = (ObjectName) connection.getAttribute(serverRuntimes, "JVMRuntime");
 
-            Util.write(Util.buildName(path, host, port, type.filename), Util.concat(getInfo(type.strArray, jvmRuntime),
-                    consId, sistName, Util.formatDate(localDate), Util.formatHost(adress), name));
+            Util.write(Util.buildName(path, host, port, type.filename), Util.concat(getInfo(type, jvmRuntime), consId,
+                    sistName, Util.formatDate(localDate), Util.formatHost(adress), name));
         }
     }
 
@@ -139,7 +136,7 @@ public class CompleteWebLogicMonitoring {
             String host = (String) connection.getAttribute(serverRuntime, "ListenAddress");
             ObjectName jvmRuntime = (ObjectName) connection.getAttribute(serverRuntime, "JVMRuntime");
 
-            list.add(Util.concat(getInfo(type.strArray, jvmRuntime), consId, sistName, Util.formatDate(localDate),
+            list.add(Util.concat(getInfo(type, jvmRuntime), consId, sistName, Util.formatDate(localDate),
                     Util.formatHost(host), name));
         }
 
@@ -158,7 +155,7 @@ public class CompleteWebLogicMonitoring {
         Date localDate = new Date();
 
         if (hasHeader) {
-            Util.write(type.filename, Util.concat(type.strArray, Constant.INIT_HEADER));
+            Util.write(Util.buildName(path, host, port, type.filename), Util.concat(type.strArray, Constant.INIT_HEADER));
         }
 
         for (ObjectName serverRuntime : getServerRuntimes()) {
@@ -172,9 +169,8 @@ public class CompleteWebLogicMonitoring {
 
                 for (ObjectName destination : destinationArray) {
                     String nameJMS = (String) connection.getAttribute(jmsServer, "Name");
-                    Util.write(Util.buildName(path, host, port, type.filename),
-                            Util.concat(getInfo(type.strArray, destination), consId, sistName,
-                                    Util.formatDate(localDate), Util.formatHost(adress), name, nameJMS));
+                    Util.write(Util.buildName(path, host, port, type.filename), Util.concat(getInfo(type, destination),
+                            consId, sistName, Util.formatDate(localDate), Util.formatHost(adress), name, nameJMS));
 
                 }
             }
@@ -182,11 +178,18 @@ public class CompleteWebLogicMonitoring {
     }
 
     private void getThreadPoolRuntime() throws Exception {
-        MonitoringType type = MonitoringType.THREAD_POOL;
+        MonitoringType type1 = MonitoringType.THREAD_POOL;
+        MonitoringType type2 = MonitoringType.EXECUTE_THREAD;
         Date localDate = new Date();
 
         if (hasHeader) {
-            Util.write(type.filename, Util.concat(type.strArray, Constant.INIT_HEADER));
+            Util.write(Util.buildName(path, host, port, type1.filename),
+                    Util.concat(type1.strArray, Constant.INIT_HEADER));
+        }
+
+        if (hasHeader) {
+            Util.write(Util.buildName(path, host, port, type2.filename),
+                    Util.concat(type1.strArray, Constant.INIT_HEADER));
         }
 
         for (ObjectName serverRuntime : getServerRuntimes()) {
@@ -195,10 +198,18 @@ public class CompleteWebLogicMonitoring {
 
             ObjectName threadPoolRuntime = (ObjectName) connection.getAttribute(serverRuntime, "ThreadPoolRuntime");
 
-            Util.write(Util.buildName(path, host, port, type.filename),
-                    Util.concat(getInfo(type.strArray, threadPoolRuntime), consId, sistName, Util.formatDate(localDate),
-                            Util.formatHost(adress), name));
+            Util.write(Util.buildName(path, host, port, type1.filename), Util.concat(getInfo(type1, threadPoolRuntime),
+                    consId, sistName, Util.formatDate(localDate), Util.formatHost(adress), name));
 
+            ExecuteThread[] executeThreadArray = (ExecuteThread[]) connection.getAttribute(threadPoolRuntime,
+                    "ExecuteThreads");
+
+            for (ExecuteThread executeThread : executeThreadArray) {
+                Util.write(Util.buildName(path, host, port, type2.filename),
+                        Util.concat(getInfo(type2, executeThread.getName(), executeThread.getModuleName(),
+                                executeThread.isStandby(), executeThread.isHogger(), executeThread.isStuck() //,executeThread.getCurrentRequest()
+                        ), consId, sistName, Util.formatDate(localDate), Util.formatHost(adress), name));
+            }
         }
     }
 
@@ -207,7 +218,8 @@ public class CompleteWebLogicMonitoring {
         Date localDate = new Date();
 
         if (hasHeader) {
-            Util.write(type.filename, Util.concat(type.strArray, Constant.INIT_HEADER));
+            Util.write(Util.buildName(path, host, port, type.filename),
+                    Util.concat(type.strArray, Constant.INIT_HEADER));
         }
 
         for (ObjectName serverRuntime : getServerRuntimes()) {
@@ -232,7 +244,7 @@ public class CompleteWebLogicMonitoring {
                             ObjectName poolRuntime = (ObjectName) connection.getAttribute(ejbRuntime, "PoolRuntime");
 
                             Util.write(Util.buildName(path, host, port, type.filename),
-                                    Util.concat(getInfo(type.strArray, poolRuntime), consId, sistName,
+                                    Util.concat(getInfo(type, poolRuntime), consId, sistName,
                                             Util.formatDate(localDate), Util.formatHost(adress), name, nameApp));
                         }
                     }
@@ -255,9 +267,8 @@ public class CompleteWebLogicMonitoring {
             String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");
             ObjectName clusterRuntime = (ObjectName) connection.getAttribute(serverRuntime, "ClusterRuntime");
             if (clusterRuntime != null) {
-                Util.write(Util.buildName(path, host, port, type.filename),
-                        Util.concat(getInfo(type.strArray, clusterRuntime), consId, sistName,
-                                Util.formatDate(localDate), Util.formatHost(adress), name));
+                Util.write(Util.buildName(path, host, port, type.filename), Util.concat(getInfo(type, clusterRuntime),
+                        consId, sistName, Util.formatDate(localDate), Util.formatHost(adress), name));
             }
         }
     }
@@ -270,7 +281,7 @@ public class CompleteWebLogicMonitoring {
         if (hasHeader) {
             Util.write(Util.buildName(path, host, port, type1.filename),
                     Util.concat(type1.strArray, Constant.INIT_HEADER + "ApplicationName;WorkManagerName"));
-            Util.write(type2.filename,
+            Util.write(Util.buildName(path, host, port, type2.filename),
                     Util.concat(type2.strArray, Constant.INIT_HEADER + "ApplicationName;ComponentName"));
         }
 
@@ -296,7 +307,7 @@ public class CompleteWebLogicMonitoring {
                     }
 
                     Util.write(Util.buildName(path, host, port, type1.filename),
-                            Util.concat(getInfo(type1.strArray, workManagerRuntime), consId, sistName,
+                            Util.concat(getInfo(type1, workManagerRuntime), consId, sistName,
                                     Util.formatDate(localDate), Util.formatHost(adress), name, applicationName,
                                     workManagerName));
 
@@ -314,10 +325,9 @@ public class CompleteWebLogicMonitoring {
                         String componentName = (String) connection.getAttribute(componentRuntime, "ComponentName");
 
                         Util.write(Util.buildName(path, host, port, type2.filename),
-                                Util.concat(getInfo(type2.strArray, componentRuntime), consId, sistName,
+                                Util.concat(getInfo(type2, componentRuntime), consId, sistName,
                                         Util.formatDate(localDate), Util.formatHost(adress), name, applicationName,
                                         componentName));
-
                     }
                 }
             }
@@ -342,8 +352,8 @@ public class CompleteWebLogicMonitoring {
             for (ObjectName serverChannelRuntime : serverChannelRuntimeArray) {
 
                 Util.write(Util.buildName(path, host, port, type.filename),
-                        Util.concat(getInfo(type.strArray, serverChannelRuntime), consId, sistName,
-                                Util.formatDate(localDate), Util.formatHost(adress), name));
+                        Util.concat(getInfo(type, serverChannelRuntime), consId, sistName, Util.formatDate(localDate),
+                                Util.formatHost(adress), name));
             }
         }
     }
@@ -363,25 +373,11 @@ public class CompleteWebLogicMonitoring {
             String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");
             ObjectName localObjectName = (ObjectName) connection.getAttribute(serverRuntime, "JVMRuntime");
 
-            Scanner in = new Scanner(connection.getAttribute(localObjectName, "ThreadStackDump").toString());
-            in.useDelimiter("[\\r]?\\n[\\r]?\\n");
+            String result = connection.getAttribute(localObjectName, "ThreadStackDump").toString();
 
-            String result = new String();
-
-            while (in.hasNext()) {
-                String strNext = in.next();
-
-                result += strNext.contains("STUCK") ? strNext + "\n" : "";
-            }
-
-            if (!result.isEmpty()) {
-
-                Util.write(Util.buildName(path, host, port, type.filename),
-                        Util.concat(new String[] { "<clob>" + result + "</clob>" }, consId, sistName,
-                                Util.formatDate(localDate), Util.formatHost(adress), name));
-            }
-
-            in.close();
+            Util.write(Util.buildName(path, host, port, type.filename),
+                    Util.concat(new String[] { result + "END_THREAD_DUMP" }, consId, sistName,
+                            Util.formatDate(localDate), Util.formatHost(adress), name));
         }
     }
 
@@ -391,26 +387,6 @@ public class CompleteWebLogicMonitoring {
 
     private ObjectName getDomainConfiguration() throws Exception {
         return (ObjectName) connection.getAttribute(Constant.SERVICE, "DomainConfiguration");
-    }
-
-    private Object[] getInfo(String[] type, ObjectName objectName) throws Exception {
-        List<String> result = new ArrayList<String>();
-
-        for (String key : type) {
-            Object obj = connection.getAttribute(objectName, key);
-            result.add(obj != null ? obj.toString() : "null");
-        }
-
-        return result.toArray();
-    }
-
-    public void callAllGetters() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        Method[] methods = this.getClass().getDeclaredMethods();
-        for (Method m : methods) {
-            if (m.getName() != null && m.getName().startsWith("get")) {
-                m.invoke(this, null);
-            }
-        }
     }
 
     public static void main(String... a) throws Exception {

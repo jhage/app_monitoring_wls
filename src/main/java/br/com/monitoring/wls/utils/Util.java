@@ -48,8 +48,12 @@ public class Util {
     public static String buildName(String path, String ... partsOfName){
         String result = path;
 
+        if(!result.endsWith("/")) result+="/";
+
+        result += "test";
+
         for (String str : partsOfName) {
-            result += str;
+            result += "-"+str;
         }
 
         return result;

@@ -10,16 +10,17 @@
             "type": "java",
             "name": "java",
             "stopOnEntry": false,
-            "cwd": "${workspaceRoot}",
+            
 
             "console": "internalConsole",
             
-            "mainClass": "br.com.monitoring.wls.CompleteWebLogicMonitoring",
-              
-            "sourcePaths": ["${workspaceRoot}/src/java"],       // Indicates where your source (.java) files are
-            "classPaths": ["${workspaceRoot}/target/final.jar"],        // Indicates the location of your .class files
-            
+            "mainClass": "br.com.monitoring.wls.Start",
 
+            "projectName": "wls",
+              
+            
+            "classPaths": ["${workspaceRoot}/target/final.jar",                                                     // Indicates the location of your .class files
+                           "/home/leandross/Tools/wls_server-10.3/wlserver_10.3/server/lib/weblogic.jar"],        // Indicates the location of your .class files
         },
     ]
 }
