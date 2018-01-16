@@ -5,10 +5,6 @@ import java.io.IOException;
 import java.util.Date;
 
 public class Util {
-    public static String formatHost(String host) {
-        return host.replaceAll(".internal.timbrasil.com.br", "")
-                .replaceAll("/[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}", "");
-    }
 
     public static String formatDate(Date date) {
         return Constant.DATE_FORMATTER.format(date);
@@ -44,7 +40,6 @@ public class Util {
         }
     }
 
-
     public static String buildName(String path, String ... partsOfName){
         String result = path;
 
@@ -57,5 +52,10 @@ public class Util {
         }
 
         return result;
+    }
+
+    public static String formatHost(String str) {
+        return str.replaceAll(".internal.timbrasil.com.br", "")
+                .replaceAll("/[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}", "");
     }
 }

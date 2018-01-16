@@ -9,14 +9,16 @@ import javax.management.MalformedObjectNameException;
 
 public class Constant {
 
+    public static final String MSG_INFO =  "Usage: java CompleteWebLogicMonitoring adm-host adm-port adm-username adm-password path_output system-id console-id header";
 
-    public static final ObjectName SERVICE;
     public static final String PROTOCOL_T3 = "t3";
     public static final String JNDI = "/jndi/weblogic.management.mbeanservers.domainruntime";
     public static final Format DATE_FORMATTER = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
     public static final String FIELD_SEPARATOR = ";";
     public static final String INIT_HEADER = "console_id;sistema_id;datetime;hostname;server;";
+
+    public static final ObjectName SERVICE;
 
     public boolean collectThreadDump = false;    
 

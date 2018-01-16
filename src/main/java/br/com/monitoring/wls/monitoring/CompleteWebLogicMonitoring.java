@@ -15,11 +15,10 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import weblogic.management.runtime.ExecuteThread;
-
 import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.utils.MonitoringType;
 import br.com.monitoring.wls.utils.Util;
+import weblogic.management.runtime.ExecuteThread;
 
 public class CompleteWebLogicMonitoring {
 
@@ -376,9 +375,31 @@ public class CompleteWebLogicMonitoring {
             String result = connection.getAttribute(localObjectName, "ThreadStackDump").toString();
 
             Util.write(Util.buildName(path, host, port, type.filename),
-                    Util.concat(new String[] { result + "END_THREAD_DUMP" }, consId, sistName,
+                    Util.concat(new String[] { result }, consId, sistName,
                             Util.formatDate(localDate), Util.formatHost(adress), name));
         }
+    }
+
+    private Object[] getInfo( MonitoringType type, ObjectName objectName) throws Exception {
+        List<String> result = new ArrayList<String>();
+
+        for (String key : type.strArray) {
+            Object obj = connection.getAttribute(objectName, key);
+            result.add(obj != null ? obj.toString() : "null");
+        }
+
+        return result.toArray();
+    }
+
+    private Object[] getInfo( MonitoringType type, Object ... arrObject) throws Exception {
+        List<String> result = new ArrayList<String>();
+
+        for (Object obj : arrObject) {
+            
+            result.add(obj != null ? obj.toString() : "null");
+        }
+
+        return result.toArray();
     }
 
     private ObjectName[] getServerRuntimes() throws Exception {
