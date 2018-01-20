@@ -1,4 +1,4 @@
-package br.com.monitoring.wls.monitoring.writers;
+package br.com.monitoring.wls.writers;
 
 public interface Writer {
     

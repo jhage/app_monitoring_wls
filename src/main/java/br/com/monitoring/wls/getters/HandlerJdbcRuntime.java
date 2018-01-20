@@ -1,18 +1,21 @@
-package br.com.monitoring.wls.monitoring.getters;
-
-import java.util.ArrayList;
-import java.util.List;
+package br.com.monitoring.wls.getters;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import br.com.monitoring.wls.monitoring.writers.Writer;
-import br.com.monitoring.wls.utils.Constant;
+import org.springframework.stereotype.Component;
+
 import br.com.monitoring.wls.utils.MonitoringType;
+import br.com.monitoring.wls.writers.Writer;
+import br.com.monitoring.wls.utils.Constant;
 
-public class HandlerServerStart implements Getter {
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final MonitoringType type = MonitoringType.SERVER_START;
+@Component
+public class HandlerJdbcRuntime implements Getter {
+
+    private static final MonitoringType type = MonitoringType.SERVER_JDBC;
 
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
 
@@ -22,10 +25,11 @@ public class HandlerServerStart implements Getter {
             Object name =  connection.getAttribute(servers, "Name");
             Object adress = connection.getAttribute(servers, "ListenAddress");
 
-            ObjectName objectName = (ObjectName) connection.getAttribute(servers, "ServerStart");
+            ObjectName[] objectNameArray = (ObjectName[]) connection.getAttribute(new ObjectName("com.bea:Name="
+                    + name + ",ServerRuntime=" + name + ",Location=" + name + ",Type=JDBCServiceRuntime"),
+                    "JDBCDataSourceRuntimeMBeans");
 
-            if (adress != null) {
-
+            for (ObjectName objectName : objectNameArray) {
                 List<Object> result = new ArrayList<Object>();
                 
                 result.add(name);
@@ -51,4 +55,9 @@ public class HandlerServerStart implements Getter {
 
         return result;
     }
+    
+	@Override
+	public MonitoringType type() {
+		return type;
+	}
 }

@@ -1,14 +1,18 @@
-package br.com.monitoring.wls.monitoring.getters;
+package br.com.monitoring.wls.getters;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
+import org.springframework.stereotype.Component;
+
 import br.com.monitoring.wls.utils.MonitoringType;
-import br.com.monitoring.wls.monitoring.writers.Writer;
+import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class HandlerJvmRuntime implements Getter {
 
     public static final MonitoringType type =  MonitoringType.JVM_RUNTIME;
@@ -16,8 +20,6 @@ public class HandlerJvmRuntime implements Getter {
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
 
         for (ObjectName serverRuntimes : getServerRuntimes(connection)) {
-
-            
 
             String name = (String) connection.getAttribute(serverRuntimes, "Name");
             String adress = (String) connection.getAttribute(serverRuntimes, "ListenAddress");
@@ -51,4 +53,9 @@ public class HandlerJvmRuntime implements Getter {
 
         return result;
     }
+
+	@Override
+	public MonitoringType type() {
+		return type;
+	}
 }

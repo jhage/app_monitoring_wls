@@ -2,38 +2,38 @@ package br.com.monitoring.wls.utils;
 
 public enum MonitoringType {
 
-        THREAD_DUMP("ThreadStuckDump.dat", new String[] { "Text" }),
+        THREAD_DUMP("ThreadStuckDump", new String[] { "Text" }),
 
-        CHANNEL("ChannelRuntime.dat", new String[] { "ChannelName", "MessagesReceivedCount", "MessagesSentCount", "BytesReceivedCount", "BytesSentCount",
+        CHANNEL("ChannelRuntime", new String[] { "ChannelName", "MessagesReceivedCount", "MessagesSentCount", "BytesReceivedCount", "BytesSentCount",
                 "ConnectionsCount" }),
 
-        WEB_APP("WebAppComponentRuntime.dat", new String[] { "OpenSessionsCurrentCount", "SessionsOpenedTotalCount" }),
+        WEB_APP("WebAppComponentRuntime", new String[] { "OpenSessionsCurrentCount", "SessionsOpenedTotalCount" }),
 
-        WORK_MANAGER("WorkManagerRuntimes.dat", new String[] { "PendingRequests", "CompletedRequests", "StuckThreadCount" }),
+        WORK_MANAGER("WorkManagerRuntimes", new String[] { "PendingRequests", "CompletedRequests", "StuckThreadCount" }),
 
-        CLUSTER_DATA("ClusterRuntime.dat", new String[] { "Name", "ResendRequestsCount", "ForeignFragmentsDroppedCount", "FragmentsReceivedCount",
+        CLUSTER_DATA("ClusterRuntime", new String[] { "Name", "ResendRequestsCount", "ForeignFragmentsDroppedCount", "FragmentsReceivedCount",
                 "FragmentsSentCount", "MulticastMessagesLostCount" }),
 
-        EJB_DATA("EJBComponentRuntime.dat", new String[] { "Name", "AccessTotalCount", "MissTotalCount", "DestroyedTotalCount", "PooledBeansCurrentCount",
+        EJB_DATA("EJBComponentRuntime", new String[] { "Name", "AccessTotalCount", "MissTotalCount", "DestroyedTotalCount", "PooledBeansCurrentCount",
                 "BeansInUseCurrentCount", "WaiterCurrentCount", "TimeoutTotalCount" }),
 
-        THREAD_POOL("ThreadPoolRuntime.dat", new String[] { "CompletedRequestCount", "ExecuteThreadTotalCount", "ExecuteThreadIdleCount", "HoggingThreadCount",
+        THREAD_POOL("ThreadPoolRuntime", new String[] { "CompletedRequestCount", "ExecuteThreadTotalCount", "ExecuteThreadIdleCount", "HoggingThreadCount",
                 "PendingUserRequestCount", "QueueLength", "StandbyThreadCount", "Throughput" }),
 
-        EXECUTE_THREAD("ExecuteThread.dat", new String[] { "Name", "ModuleName", "Standby", "Hogger", "Stuck"}),
+        EXECUTE_THREAD("ExecuteThread", new String[] { "Name", "ModuleName", "Standby", "Hogger", "Stuck"}),
 
-        SERVER_JDBC("JDBCDataSourceRuntimeMBeans.dat", new String[] { "Name", "ActiveConnectionsCurrentCount", "WaitSecondsHighCount",
+        SERVER_JDBC("JDBCDataSourceRuntimeMBeans", new String[] { "Name", "ActiveConnectionsCurrentCount", "WaitSecondsHighCount",
                 "WaitingForConnectionCurrentCount", "WaitingForConnectionFailureTotal", "WaitingForConnectionTotal", "WaitingForConnectionHighCount" }),
 
-        SERVER_START("ServerStartDomain.dat", new String[] { "Arguments", "ClassPath", "RootDirectory", "JavaHome" }),
+        SERVER_START("ServerStartDomain", new String[] { "Arguments", "ClassPath", "RootDirectory", "JavaHome" }),
 
-        JVM_RUNTIME("JVMRuntime.dat", new String[] { "HeapFreeCurrent", "HeapFreePercent", "HeapSizeCurrent", "HeapSizeMax", "JavaVersion", "JavaVMVendor" }),
+        JVM_RUNTIME("JVMRuntime", new String[] { "HeapFreeCurrent", "HeapFreePercent", "HeapSizeCurrent", "HeapSizeMax", "JavaVersion", "JavaVMVendor" }),
 
-        JROCKIT_RUNTIME("JVMRuntime.dat", new String[] { "HeapFreeCurrent", "HeapFreePercent", "HeapSizeCurrent", "HeapSizeMax", "JavaVersion", "JavaVMVendor",
+        JROCKIT_RUNTIME("JVMRuntime", new String[] { "HeapFreeCurrent", "HeapFreePercent", "HeapSizeCurrent", "HeapSizeMax", "JavaVersion", "JavaVMVendor",
                 "TotalNumberOfThreads", "NumberOfDaemonThreads", "TotalGarbageCollectionTime", "TotalGarbageCollectionCount", "Parallel", "Incremental",
                 "Generational", "GCHandlesCompaction" }),
 
-        JMS_SERVER("JMSServerRuntime.dat",
+        JMS_SERVER("JMSServerRuntime",
                 new String[] { "Name", "MessagesCurrentCount", "MessagesPendingCount", "MessagesHighCount", "MessagesReceivedCount" });
 
         public String[] strArray;

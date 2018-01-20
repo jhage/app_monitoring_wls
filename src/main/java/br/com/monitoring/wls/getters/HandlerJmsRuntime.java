@@ -1,15 +1,19 @@
-package br.com.monitoring.wls.monitoring.getters;
+package br.com.monitoring.wls.getters;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
+import org.springframework.stereotype.Component;
+
 import br.com.monitoring.wls.utils.MonitoringType;
-import br.com.monitoring.wls.monitoring.writers.Writer;
+
+import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class HandlerJmsRuntime implements Getter {
 
     private static final MonitoringType type = MonitoringType.JMS_SERVER;
@@ -56,4 +60,9 @@ public class HandlerJmsRuntime implements Getter {
 
         return result;
     }
+    
+	@Override
+	public MonitoringType type() {
+		return type;
+	}
 }

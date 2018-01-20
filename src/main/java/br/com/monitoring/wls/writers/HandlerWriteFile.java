@@ -1,4 +1,4 @@
-package br.com.monitoring.wls.monitoring.writers;
+package br.com.monitoring.wls.writers;
 
 
 import br.com.monitoring.wls.utils.Util;
@@ -9,8 +9,18 @@ import java.io.IOException;
 
 import java.util.Date;
 
+import javax.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+
+@Component
+@Scope(value = "prototype")
 public class HandlerWriteFile implements Writer {
+
+    @Value("${path.write}")
+    private String pathWrite;
 
     private final FileWriter fileWriter;
 
@@ -18,9 +28,8 @@ public class HandlerWriteFile implements Writer {
 
     private Boolean hasHeader;
 
-
-    public HandlerWriteFile(MonitoringType type,  String path, String host, Integer port, Boolean hasHeader) throws IOException{
-        this.fileWriter = new FileWriter(buildName(path, host, port, type.filename), true);
+    public HandlerWriteFile(MonitoringType type, String host, Integer port, Boolean hasHeader) throws IOException{
+        this.fileWriter = new FileWriter(buildName(this.pathWrite, host, port, type.filename), true);
         this.hasHeader = hasHeader;
         this.type = type;
     }
@@ -33,7 +42,7 @@ public class HandlerWriteFile implements Writer {
             hasHeader = Boolean.FALSE;
         }
 
-        write( Util.concat(objArray, Util.formatDate(localDate)));
+        write( concat(objArray, Util.formatDate(localDate)));
     }
 
     private static String buildName(String path, Object ... partsOfName){
@@ -47,18 +56,29 @@ public class HandlerWriteFile implements Writer {
             result += "-"+obj.toString();
         }
 
+        result += ".dat";
+
         return result;
     }
 
     private void write(String... textArray) throws IOException {
 
-        for (String text : textArray) {
+        try{
 
-            this.fileWriter.write(text);
-            this.fileWriter.write(Constant.FIELD_SEPARATOR);
+            for (String text : textArray) {
+
+                this.fileWriter.write(text);
+                this.fileWriter.write(Constant.FIELD_SEPARATOR);
+            }
+
+            fileWriter.write(Constant.LINE_SEPARATOR);
+            
+        }finally{
+
+            if (this.fileWriter != null){
+                this.fileWriter.close();
+            }                
         }
-
-        fileWriter.write(Constant.LINE_SEPARATOR);
     }
 
     private static String[] concat(Object[] b, Object... a) {
@@ -68,7 +88,9 @@ public class HandlerWriteFile implements Writer {
         return c;
     }
 
+    @PreDestroy
     public void close() throws IOException{
+        
         if (this.fileWriter != null){
             this.fileWriter.close();
         }

@@ -4,6 +4,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 
+import br.com.monitoring.wls.utils.Constant;
+
+
 public class Util {
 
     public static String formatDate(Date date) {
@@ -40,15 +43,16 @@ public class Util {
         }
     }
 
-    public static String buildName(String path, String ... partsOfName){
+    public static String buildName(String path, String... partsOfName) {
         String result = path;
 
-        if(!result.endsWith("/")) result+="/";
+        if (!result.endsWith("/"))
+            result += "/";
 
         result += "test";
 
         for (String str : partsOfName) {
-            result += "-"+str;
+            result += "-" + str;
         }
 
         return result;

@@ -20,8 +20,6 @@ public class Constant {
 
     public static final ObjectName SERVICE;
 
-    public boolean collectThreadDump = false;    
-
     static{
 
         try {
