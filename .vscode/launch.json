@@ -19,8 +19,12 @@
             "projectName": "wls",
               
             
-            "classPaths": ["${workspaceRoot}/target/final.jar",                                                     // Indicates the location of your .class files
-                           "/home/leandross/Tools/wls_server-10.3/wlserver_10.3/server/lib/weblogic.jar"],        // Indicates the location of your .class files
+            "classPaths": [ "${workspaceRoot}/target/final.jar",
+                            "${workspaceRoot}/lib/wlclient.jar",
+                            "${workspaceRoot}/lib/wlconnector.jar",
+                            "${workspaceRoot}/lib/wljmsclient.jar",
+                            "${workspaceRoot}/lib/wljmxclient.jar",
+                            "${workspaceRoot}/lib/wls-api.jar"],
         },
     ]
 }
