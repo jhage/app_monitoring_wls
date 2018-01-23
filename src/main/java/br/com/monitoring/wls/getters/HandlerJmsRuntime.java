@@ -13,7 +13,7 @@ import br.com.monitoring.wls.utils.Constant;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Component
+@Component
 public class HandlerJmsRuntime implements Getter {
 
     private static final MonitoringType type = MonitoringType.JMS_SERVER;

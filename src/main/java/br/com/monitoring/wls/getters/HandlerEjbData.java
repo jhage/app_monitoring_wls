@@ -12,7 +12,7 @@ import br.com.monitoring.wls.utils.Constant;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Component
+@Component
 public class HandlerEjbData implements Getter {
 
     private static final MonitoringType type = MonitoringType.EJB_DATA;

@@ -12,7 +12,7 @@ import br.com.monitoring.wls.utils.Constant;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Component
+@Component
 public class HandlerJvmRuntime implements Getter {
 
     public static final MonitoringType type =  MonitoringType.JVM_RUNTIME;

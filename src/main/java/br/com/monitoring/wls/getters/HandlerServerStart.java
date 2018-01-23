@@ -12,7 +12,7 @@ import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.utils.MonitoringType;
 
-//@Component
+@Component
 public class HandlerServerStart implements Getter {
 
     private static final MonitoringType type = MonitoringType.SERVER_START;
