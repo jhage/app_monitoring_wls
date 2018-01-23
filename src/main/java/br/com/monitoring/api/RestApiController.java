@@ -17,7 +17,7 @@ import javax.management.remote.JMXServiceURL;
 
 import br.com.monitoring.wls.getters.Getter;
 import br.com.monitoring.wls.utils.Constant;
-import br.com.monitoring.wls.writers.HandlerWriteFile;
+import br.com.monitoring.wls.writers.HandlerWriteElk;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -55,11 +55,9 @@ public class RestApiController {
 
             for (Getter g : getterList) {
 
-                HandlerWriteFile w = context.getBean(HandlerWriteFile.class, g.type(), host, port, false);
-
-                g.execute(connection, w);
-
-                w.close();
+                HandlerWriteElk w2 = context.getBean(HandlerWriteElk.class, g.type(), host, port);
+                g.execute(connection, w2);
+                w2.close();
             }
 
         } catch (Exception e) {

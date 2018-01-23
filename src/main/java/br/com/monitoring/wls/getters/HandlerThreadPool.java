@@ -27,10 +27,9 @@ public class HandlerThreadPool implements Getter {
 
             ObjectName threadPoolRuntime = (ObjectName) connection.getAttribute(serverRuntime, "ThreadPoolRuntime");
 
-            ExecuteThread[] executeThreadArray = (ExecuteThread[]) connection.getAttribute(threadPoolRuntime,
-                    "ExecuteThreads");
+            ExecuteThread[] arr = (ExecuteThread[]) connection.getAttribute(threadPoolRuntime, "ExecuteThreads");
 
-            for (ExecuteThread executeThread : executeThreadArray) {
+            for (ExecuteThread executeThread : arr) {
 
                 List<Object> result = new ArrayList<Object>();
 
@@ -57,8 +56,8 @@ public class HandlerThreadPool implements Getter {
         return result;
     }
 
-	@Override
-	public MonitoringType type() {
-		return type;
-	}
+    @Override
+    public MonitoringType type() {
+        return type;
+    }
 }

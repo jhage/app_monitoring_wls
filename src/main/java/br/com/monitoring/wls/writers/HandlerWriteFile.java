@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import java.util.Date;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -19,19 +20,29 @@ import org.springframework.stereotype.Component;
 @Scope(value = "prototype")
 public class HandlerWriteFile implements Writer {
 
-    @Value("${path.write}")
+    @Value("${file.path.write}")
     private String pathWrite;
 
-    private final FileWriter fileWriter;
+    private FileWriter fileWriter;
 
     private final MonitoringType type;
 
+    private final String host;
+
+    private final Integer port;
+
     private Boolean hasHeader;
 
-    public HandlerWriteFile(MonitoringType type, String host, Integer port, Boolean hasHeader) throws IOException{
-        this.fileWriter = new FileWriter(buildName(this.pathWrite, host, port, type.filename), true);
+    public HandlerWriteFile(MonitoringType type, String host, Integer port, Boolean hasHeader){
         this.hasHeader = hasHeader;
         this.type = type;
+        this.port = port;
+        this.host = host;
+    }
+
+    @PostConstruct
+    public void execute() throws Exception {
+        this.fileWriter = new FileWriter(buildName(this.pathWrite, host, port, type.filename), true);
     }
 
     public void execute( Object [] objArray) throws Exception {
@@ -88,7 +99,7 @@ public class HandlerWriteFile implements Writer {
         return c;
     }
 
-    @PreDestroy
+    //@PreDestroy
     public void close() throws IOException{
         
         if (this.fileWriter != null){

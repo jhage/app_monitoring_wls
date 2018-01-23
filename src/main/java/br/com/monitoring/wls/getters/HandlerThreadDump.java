@@ -12,7 +12,7 @@ import br.com.monitoring.wls.utils.Constant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+//@Component
 public class HandlerThreadDump implements Getter {
 
     //private static final MonitoringType type1 = MonitoringType.THREAD_POOL;
