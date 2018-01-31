@@ -1,5 +1,9 @@
 package br.com.monitoring.wls.getters;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
@@ -15,6 +19,8 @@ import java.util.List;
 @Component
 public class HandlerJdbcRuntime implements Getter {
 
+    private static final Logger logger = LoggerFactory.getLogger(HandlerJdbcRuntime.class);
+
     private static final MonitoringType type = MonitoringType.SERVER_JDBC;
 
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
@@ -25,18 +31,23 @@ public class HandlerJdbcRuntime implements Getter {
             Object name =  connection.getAttribute(servers, "Name");
             Object adress = connection.getAttribute(servers, "ListenAddress");
 
-            ObjectName[] objectNameArray = (ObjectName[]) connection.getAttribute(new ObjectName("com.bea:Name="
-                    + name + ",ServerRuntime=" + name + ",Location=" + name + ",Type=JDBCServiceRuntime"),
-                    "JDBCDataSourceRuntimeMBeans");
+            try{
+                ObjectName[] objectNameArray = (ObjectName[]) connection.getAttribute(new ObjectName("com.bea:Name="
+                + name + ",ServerRuntime=" + name + ",Location=" + name + ",Type=JDBCServiceRuntime"),
+                "JDBCDataSourceRuntimeMBeans");
 
-            for (ObjectName objectName : objectNameArray) {
-                List<Object> result = new ArrayList<Object>();
-                
-                result.add(name);
-                result.add(adress);
-                result.addAll(getInfo(connection, objectName));
 
-                writer.execute( result.toArray());
+                for (ObjectName objectName : objectNameArray) {
+                    List<Object> result = new ArrayList<Object>();
+
+                    result.add(adress);
+                    result.add(name);
+                    result.addAll(getInfo(connection, objectName));
+    
+                    writer.execute( result.toArray());
+                }    
+            }catch (InstanceNotFoundException e){
+                logger.warn("Didnt find config from registry jdbc",e);
             }
         }
     }

@@ -15,7 +15,6 @@ import java.util.List;
 @Component
 public class HandlerThreadDump implements Getter {
 
-    //private static final MonitoringType type1 = MonitoringType.THREAD_POOL;
     public static final MonitoringType type = MonitoringType.THREAD_DUMP;
 
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
@@ -30,8 +29,8 @@ public class HandlerThreadDump implements Getter {
 
             List<Object> result = new ArrayList<Object>();
 
-            result.add(name);
             result.add(adress);
+            result.add(name);
             result.addAll(getInfo(threadDump));
 
             writer.execute(result.toArray());

@@ -25,9 +25,9 @@ public enum MonitoringType {
                                         "HoggingThreadCount", "PendingUserRequestCount", "QueueLength",
                                         "StandbyThreadCount", "Throughput" }),
 
-        EXECUTE_THREAD("ExecuteThread", new String[] { "Name", "ModuleName", "Standby", "Hogger", "Stuck" }),
+        EXECUTE_THREAD("ExecuteThreadRuntime", new String[] { "Name", "ModuleName", "Standby", "Hogger", "Stuck" }),
 
-        SERVER_JDBC("JDBCDataSourceRuntimeMBeans",
+        SERVER_JDBC("JDBCDataSourceRuntime",
                         new String[] { "Name", "ActiveConnectionsCurrentCount", "WaitSecondsHighCount",
                                         "WaitingForConnectionCurrentCount", "WaitingForConnectionFailureTotal",
                                         "WaitingForConnectionTotal", "WaitingForConnectionHighCount" }),

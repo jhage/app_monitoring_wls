@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PreDestroy;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -19,6 +20,7 @@ import br.com.monitoring.wls.getters.Getter;
 import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.writers.HandlerWriteElk;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -35,33 +37,47 @@ public class RestApiController {
     @Autowired
     private ApplicationContext context;
 
+    private JMXConnector connector;
+
     //curl localhost:8080/api/takeSnapshot/otp1wl01.internal.timbrasil.com.br/7007/capacity/timbrasil01
     @RequestMapping(path = "/takeSnapshot/{host}/{port}/{user}/{pass}", method = RequestMethod.GET)
     public void takeSnapshot(@PathVariable String host, @PathVariable Integer port, @PathVariable String user,
             @PathVariable String pass) throws Exception {
 
+        MBeanServerConnection connection = getConnection(host, port, user, pass);
+
+        try {
+
+            for (Getter g : getterList) {
+
+                g.execute(connection, context.getBean(HandlerWriteElk.class, g.type(), host, port));
+            }
+        
+        } catch (Exception e) {
+            logger.error("Error on processing request", e);
+        }finally{
+            this.close();
+        }
+    }
+
+    private MBeanServerConnection getConnection (String host, Integer port, String user, String pass) throws IOException {
         Map<String, String> localHashtable = new Hashtable<String, String>();
 
         localHashtable.put("java.naming.security.principal", user);
         localHashtable.put("java.naming.security.credentials", pass);
         localHashtable.put("jmx.remote.protocol.provider.pkgs", "weblogic.management.remote");
 
-        JMXConnector connector = JMXConnectorFactory.connect(
+        this.connector = JMXConnectorFactory.connect(
                 new JMXServiceURL(Constant.PROTOCOL_T3, host, Integer.valueOf(port), Constant.JNDI), localHashtable);
 
-        MBeanServerConnection connection = connector.getMBeanServerConnection();
+        return this.connector.getMBeanServerConnection();
+    }
 
-        try {
-
-            for (Getter g : getterList) {
-
-                HandlerWriteElk w2 = context.getBean(HandlerWriteElk.class, g.type(), host, port);
-                g.execute(connection, w2);
-                w2.close();
-            }
-
-        } catch (Exception e) {
-            logger.error("Error on processing request", e);
+    @PreDestroy
+    private void close() throws IOException{
+        if (this.connector != null){
+            this.connector.close();
         }
     }
+
 }

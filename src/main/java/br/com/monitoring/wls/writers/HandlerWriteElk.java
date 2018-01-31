@@ -64,6 +64,8 @@ public class HandlerWriteElk implements Writer {
         logger.debug("Just connected to " + socket.getRemoteSocketAddress());
 
         logger.debug("Just args host:{} port:{} type:{}", this.host,this.port, this.type);
+        
+        logger.debug("Just content:{}", objArray);
 
         write(concat(objArray, this.type, this.host, this.port, Util.formatDate(localDate)));
     }
