@@ -1,7 +1,10 @@
 package br.com.monitoring.wls.getters;
 
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Component;
 
@@ -9,11 +12,13 @@ import br.com.monitoring.wls.utils.MonitoringType;
 import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class HandlerThreadDump implements Getter {
+
+    private static final Logger logger = LoggerFactory.getLogger(HandlerThreadDump.class);
 
     public static final MonitoringType type = MonitoringType.THREAD_DUMP;
 
@@ -21,33 +26,33 @@ public class HandlerThreadDump implements Getter {
 
         for (ObjectName serverRuntime : getServerRuntimes(connection)) {
 
-            String name = (String) connection.getAttribute(serverRuntime, "Name");
-            String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");
-            ObjectName localObjectName = (ObjectName) connection.getAttribute(serverRuntime, "JVMRuntime");
+            Map<String,Object> result = new HashMap<String,Object>();
 
-            String threadDump = connection.getAttribute(localObjectName, "ThreadStackDump").toString();
+            try {
 
-            List<Object> result = new ArrayList<Object>();
+                String name = (String) connection.getAttribute(serverRuntime, "Name");
+                String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");    
 
-            result.add(adress);
-            result.add(name);
-            result.addAll(getInfo(threadDump));
+                ObjectName jvmRuntime = (ObjectName) connection.getAttribute(serverRuntime, "JVMRuntime");
 
-            writer.execute(result.toArray());
+                String threadDump = connection.getAttribute(jvmRuntime, "ThreadStackDump").toString();
+
+                result.put("Name",name);
+                result.put("ListenAdress",adress);
+                result.put("ThreadDump",threadDump);
+
+            } catch (InstanceNotFoundException e) {
+                logger.warn("Error on process:{}", e.getMessage());
+
+                result.put("errorMessage", e.getMessage());
+            }
+
+            writer.execute(result);
         }
     }
 
     private ObjectName[] getServerRuntimes(MBeanServerConnection connection) throws Exception {
         return (ObjectName[]) connection.getAttribute(Constant.SERVICE, "ServerRuntimes");
-    }
-
-    private List<Object> getInfo(Object... arrObject) throws Exception {
-        List<Object> result = new ArrayList<Object>();
-
-        for (Object obj : arrObject) {
-            result.add(obj != null ? obj.toString() : "null");
-        }
-        return result;
     }
 
 	@Override

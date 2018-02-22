@@ -10,11 +10,12 @@ import javax.management.ObjectName;
 import org.springframework.stereotype.Component;
 
 import br.com.monitoring.wls.utils.MonitoringType;
+import br.com.monitoring.wls.utils.Util;
 import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class HandlerJdbcRuntime implements Getter {
@@ -28,43 +29,40 @@ public class HandlerJdbcRuntime implements Getter {
         ObjectName domain = getDomainConfiguration(connection);
         for (ObjectName servers : (ObjectName[]) connection.getAttribute(domain, "Servers")) {
 
-            Object name =  connection.getAttribute(servers, "Name");
-            Object adress = connection.getAttribute(servers, "ListenAddress");
-
             try{
+
+                Object name =  connection.getAttribute(servers, "Name");
+                Object adress = connection.getAttribute(servers, "ListenAddress");
+
                 ObjectName[] objectNameArray = (ObjectName[]) connection.getAttribute(new ObjectName("com.bea:Name="
                 + name + ",ServerRuntime=" + name + ",Location=" + name + ",Type=JDBCServiceRuntime"),
                 "JDBCDataSourceRuntimeMBeans");
 
-
                 for (ObjectName objectName : objectNameArray) {
-                    List<Object> result = new ArrayList<Object>();
 
-                    result.add(adress);
-                    result.add(name);
-                    result.addAll(getInfo(connection, objectName));
+                    Map<String,Object> result = new HashMap<String,Object>();
+                
+                    result.put("Name",name);
+                    result.put("ListenAddress",adress);
+                    
+                    result.putAll(Util.getInfo(connection, objectName, type));
     
-                    writer.execute( result.toArray());
+                    writer.execute(result);
                 }    
-            }catch (InstanceNotFoundException e){
-                logger.warn("Didnt find config from registry jdbc",e);
+            } catch (InstanceNotFoundException e) {
+                logger.warn("Error on process:{}", e.getMessage());
+
+                Map<String,Object> result = new HashMap<String,Object>();
+
+                result.put("errorMessage", e.getMessage());
+
+                writer.execute(result);
             }
         }
     }
 
     private ObjectName getDomainConfiguration(MBeanServerConnection connection) throws Exception {
         return (ObjectName) connection.getAttribute(Constant.SERVICE, "DomainConfiguration");
-    }
-
-    private List<Object> getInfo(MBeanServerConnection connection, ObjectName objectName) throws Exception {
-        List<Object> result = new ArrayList<Object>();
-
-        for (String key : type.strArray) {
-            Object obj = connection.getAttribute(objectName, key);
-            result.add(obj != null ? obj.toString() : "null");
-        }
-
-        return result;
     }
     
 	@Override

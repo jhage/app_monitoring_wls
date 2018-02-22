@@ -1,19 +1,26 @@
 package br.com.monitoring.wls.getters;
 
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Component;
 
 import br.com.monitoring.wls.utils.MonitoringType;
+import br.com.monitoring.wls.utils.Util;
 import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class HandlerJvmRuntime implements Getter {
+
+    private static final Logger logger = LoggerFactory.getLogger(HandlerJvmRuntime.class);
 
     public static final MonitoringType type =  MonitoringType.JVM_RUNTIME;
 
@@ -21,37 +28,33 @@ public class HandlerJvmRuntime implements Getter {
 
         for (ObjectName serverRuntimes : getServerRuntimes(connection)) {
 
-            String name = (String) connection.getAttribute(serverRuntimes, "Name");
-            String adress = (String) connection.getAttribute(serverRuntimes, "ListenAddress");
 
-            ObjectName objectName = (ObjectName) connection.getAttribute(serverRuntimes, "JVMRuntime");
+            Map<String,Object> result = new HashMap<String,Object>();
 
-            if (adress != null) {
+            try{
 
-                List<Object> result = new ArrayList<Object>();
+                String name = (String) connection.getAttribute(serverRuntimes, "Name");
+                String adress = (String) connection.getAttribute(serverRuntimes, "ListenAddress");    
 
-                result.add(adress);
-                result.add(name);
-                result.addAll(getInfo(connection, objectName));
+                ObjectName objectName = (ObjectName) connection.getAttribute(serverRuntimes, "JVMRuntime");
+                
+                result.put("Name",name);
+                result.put("ListenAddress",adress);
+                
+                result.putAll(Util.getInfo(connection, objectName, type));
 
-                writer.execute(result.toArray());
+            } catch (InstanceNotFoundException e) {
+                logger.warn("Error on process:{}", e.getMessage());
+
+                result.put("errorMessage", e.getMessage());
             }
+
+            writer.execute(result);
         }
     }
 
     private ObjectName[] getServerRuntimes(MBeanServerConnection connection) throws Exception {
         return (ObjectName[]) connection.getAttribute(Constant.SERVICE, "ServerRuntimes");
-    }
-
-    private List<Object> getInfo(MBeanServerConnection connection, ObjectName objectName) throws Exception {
-        List<Object> result = new ArrayList<Object>();
-
-        for (String key : type.strArray) {
-            Object obj = connection.getAttribute(objectName, key);
-            result.add(obj != null ? obj.toString() : "null");
-        }
-
-        return result;
     }
 
 	@Override

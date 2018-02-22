@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PreDestroy;
+
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -21,12 +23,13 @@ import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.writers.HandlerWriteElk;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/api")
+@RequestMapping(value = "/api/wls")
 public class RestApiController {
 
     private static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
@@ -39,10 +42,14 @@ public class RestApiController {
 
     private JMXConnector connector;
 
-    //curl localhost:8080/api/takeSnapshot/otp1wl01.internal.timbrasil.com.br/7007/capacity/timbrasil01
-    @RequestMapping(path = "/takeSnapshot/{host}/{port}/{user}/{pass}", method = RequestMethod.GET)
-    public void takeSnapshot(@PathVariable String host, @PathVariable Integer port, @PathVariable String user,
-            @PathVariable String pass) throws Exception {
+    @RequestMapping(path = "/takeSnapshot/{host}/{port}", method = RequestMethod.GET)
+    public void takeSnapshot(@PathVariable String host, @PathVariable Integer port, @RequestParam String user, @RequestParam String pass
+            ) throws Exception {
+
+        user = URLDecoder.decode(user, "UTF-8"); pass = URLDecoder.decode(pass, "UTF-8");
+
+        logger.info("calling takeSnapshot path -  host:{} port:{} service:{}", host, port);
+        logger.debug("calling takeSnapshot param - user:{} pass:{}", user, pass);
 
         MBeanServerConnection connection = getConnection(host, port, user, pass);
 

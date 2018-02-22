@@ -1,16 +1,17 @@
 package br.com.monitoring.wls.writers;
 
-
-import br.com.monitoring.wls.utils.Util;
 import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.utils.MonitoringType;
+import br.com.monitoring.wls.utils.Util;
 import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.Date;
-
+import java.util.Map;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+
+import com.google.gson.Gson;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -41,19 +42,20 @@ public class HandlerWriteFile implements Writer {
     }
 
     @PostConstruct
-    public void execute() throws Exception {
+    public void init() throws Exception {
         this.fileWriter = new FileWriter(buildName(this.pathWrite, host, port, type.filename), true);
     }
 
-    public void execute( Object [] objArray) throws Exception {
+    public void execute( Map<String,Object > map) throws Exception {
         Date localDate = new Date();
 
         if (hasHeader) {
             write(concat(type.strArray, Constant.INIT_HEADER));
             hasHeader = Boolean.FALSE;
         }
+        map.put("timestamp", Util.formatDate(localDate));
 
-        write( concat(objArray, Util.formatDate(localDate)));
+        write( new Gson().toJson(map) );
     }
 
     private static String buildName(String path, Object ... partsOfName){

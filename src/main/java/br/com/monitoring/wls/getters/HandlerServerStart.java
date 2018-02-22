@@ -1,19 +1,26 @@
 package br.com.monitoring.wls.getters;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Component;
 
 import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.utils.MonitoringType;
+import br.com.monitoring.wls.utils.Util;
 
 @Component
 public class HandlerServerStart implements Getter {
+
+    private static final Logger logger = LoggerFactory.getLogger(HandlerServerStart.class);
 
     private static final MonitoringType type = MonitoringType.SERVER_START;
 
@@ -22,37 +29,32 @@ public class HandlerServerStart implements Getter {
         ObjectName domain = getDomainConfiguration(connection);
         for (ObjectName servers : (ObjectName[]) connection.getAttribute(domain, "Servers")) {
 
-            Object name =  connection.getAttribute(servers, "Name");
-            Object adress = connection.getAttribute(servers, "ListenAddress");
+            Map<String,Object> result = new HashMap<String,Object>();
 
-            ObjectName objectName = (ObjectName) connection.getAttribute(servers, "ServerStart");
+            try{
 
-            if (adress != null) {
+                Object name =  connection.getAttribute(servers, "Name");
+                Object adress = connection.getAttribute(servers, "ListenAddress");
 
-                List<Object> result = new ArrayList<Object>();
+                ObjectName objectName = (ObjectName) connection.getAttribute(servers, "ServerStart");
                 
-                result.add(name);
-                result.add(adress);
-                result.addAll(getInfo(connection, objectName));
+                result.put("Name",name);
+                result.put("ListenAddress",adress);
+                
+                result.putAll(Util.getInfo(connection, objectName, type));
 
-                writer.execute( result.toArray());
+            } catch (InstanceNotFoundException e) {
+                logger.warn("Error on processe error:{}", e.getMessage());
+                
+                result.put("errorMessage", e.getMessage());
             }
+
+            writer.execute(result);
         }
     }
 
     private ObjectName getDomainConfiguration(MBeanServerConnection connection) throws Exception {
         return (ObjectName) connection.getAttribute(Constant.SERVICE, "DomainConfiguration");
-    }
-
-    private List<Object> getInfo(MBeanServerConnection connection, ObjectName objectName) throws Exception {
-        List<Object> result = new ArrayList<Object>();
-
-        for (String key : type.strArray) {
-            Object obj = connection.getAttribute(objectName, key);
-            result.add(obj != null ? obj.toString() : "null");
-        }
-
-        return result;
     }
 
 	@Override

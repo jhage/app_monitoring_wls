@@ -1,6 +1,8 @@
 package br.com.monitoring.wls.writers;
 
+import java.util.Map;
+
 public interface Writer {
     
-    public void execute(Object[] objArray) throws Exception;
+    public void execute(Map <String, Object> map) throws Exception;
 }

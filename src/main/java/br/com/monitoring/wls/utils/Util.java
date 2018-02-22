@@ -3,9 +3,11 @@ package br.com.monitoring.wls.utils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
-
+import java.util.HashMap;
+import java.util.Map;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import br.com.monitoring.wls.utils.Constant;
-
 
 public class Util {
 
@@ -61,5 +63,17 @@ public class Util {
     public static String formatHost(String str) {
         return str.replaceAll(".internal.timbrasil.com.br", "")
                 .replaceAll("/[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}", "");
+    }
+
+    public static Map<String, Object> getInfo(MBeanServerConnection connection, ObjectName objectName,
+            MonitoringType type) throws Exception {
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        for (String key : type.strArray) {
+            Object obj = connection.getAttribute(objectName, key);
+            result.put(key, obj != null ? obj.toString() : "null");
+        }
+
+        return result;
     }
 }

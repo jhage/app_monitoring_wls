@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.monitoring.wls.utils.Util;
+import com.google.gson.Gson;
 import br.com.monitoring.wls.utils.MonitoringType;
 
 import java.io.BufferedOutputStream;
@@ -11,7 +12,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Date;
-
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -33,8 +35,6 @@ public class HandlerWriteElk implements Writer {
 
     @Value("${logstash.line.separator}")
     private String lineSeparator;
-    @Value("${logstash.field.separator}")
-    private String fieldSeparator;
 
     @Value("${logstash.socket.port}")
     private Integer socketPort;
@@ -59,32 +59,30 @@ public class HandlerWriteElk implements Writer {
         this.os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
     }
 
-    public void execute(Object[] objArray) throws Exception {
+    public void execute(Map <String, Object> map) throws Exception {
 
         logger.debug("Just connected to " + socket.getRemoteSocketAddress());
-
         logger.debug("Just args host:{} port:{} type:{}", this.host,this.port, this.type);
         
-        logger.debug("Just content:{}", objArray);
+        Map<String,Object> result = new HashMap<String,Object>();
 
-        write(concat(objArray, this.type, this.host, this.port, Util.formatDate(localDate)));
-    }
+        result.put("timestamp", Util.formatDate(localDate));
+        result.put("type", this.type.toString().toLowerCase());
 
-    private void write(Object... textArray) throws IOException {
+        result.put("host", this.host);
+        result.put("port", this.port);
 
-        for (Object text : textArray) {
-            this.os.writeBytes(text.toString());
-            this.os.writeBytes(this.fieldSeparator);
+        for (String key  : map.keySet()){
+
+            result.put(key.toLowerCase(), map.get(key));
         }
 
-        this.os.writeBytes(this.lineSeparator);
+        this.write(result);
     }
 
-    private static Object[] concat(Object[] b, Object... a) {
-        Object[] c = new Object[a.length + b.length];
-        System.arraycopy(a, 0, c, 0, a.length);
-        System.arraycopy(b, 0, c, a.length, b.length);
-        return c;
+    private void write(Map<String, Object> map) throws IOException {
+    
+        this.os.writeBytes(new Gson().toJson(map)+this.lineSeparator);
     }
 
     @PreDestroy
