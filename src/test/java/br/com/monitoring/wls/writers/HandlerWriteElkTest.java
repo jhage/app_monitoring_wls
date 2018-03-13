@@ -2,7 +2,6 @@ package br.com.monitoring.wls.writers;
 
 import br.com.monitoring.ApplicationTest;
 import br.com.monitoring.wls.getters.Getter;
-import br.com.monitoring.wls.getters.HandlerJvmRuntime;
 import br.com.monitoring.wls.getters.HandlerThreadDump;
 
 import java.util.HashMap;
