@@ -35,10 +35,10 @@ public class RestApiController {
     private static final Logger logger = LoggerFactory.getLogger(RestApiController.class);
 
     @Autowired
-    private List<Getter> getterList;
+    private Writer writer;
 
     @Autowired
-    private ApplicationContext context;
+    private List<Getter> getterList;
 
     private JMXConnector connector;
 
@@ -57,7 +57,7 @@ public class RestApiController {
 
             for (Getter g : getterList) {
 
-                g.execute(connection, context.getBean(HandlerWriteElk.class, g.type(), host, port));
+                g.execute(connection, this.writer, g.type(), host, port));
             }
         
         } catch (Exception e) {
