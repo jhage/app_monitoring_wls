@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,19 +31,17 @@ public class RestApiControllerTest {
 
     @Before
     public void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders
-        .webAppContextSetup(webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
     public void takeSnapshot() throws Exception {
         logger.info("takeSnapshot : call rest api");
 
-        ResultActions result = mockMvc.perform(get("/api/wls/takeSnapshot/otp1wl01.internal.timbrasil.com.br/7007")
-            .param("user","capacity").param("pass","timbrasil01")
-        );
+        ResultActions result = null;
 
-        result.andDo(print());
+        result = mockMvc.perform(get("/api/wls/takeSnapshot/snelnx886.internal.timbrasil.com.br/2474")
+                .param("user", "capacity").param("pass", "capacity01"));
         result.andExpect(status().isOk());
     }
 }

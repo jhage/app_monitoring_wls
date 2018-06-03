@@ -1,6 +1,6 @@
 package br.com.monitoring;
 
-import br.com.monitoring.wls.utils.Constant;
+import br.com.monitoring.wls.utils.Util;
 
 import java.io.IOException;
 
@@ -30,6 +30,7 @@ public class ApplicationTest {
 
     @Value("${logstash.socket.port}")
     private Integer user;
+    
     @Value("${logstash.socket.host}")
     private String pass;
 
@@ -55,7 +56,7 @@ public class ApplicationTest {
             localHashtable.put("jmx.remote.protocol.provider.pkgs", "weblogic.management.remote");
     
             this.connector = JMXConnectorFactory.connect(
-                new JMXServiceURL(Constant.PROTOCOL_T3, host, Integer.valueOf(port), Constant.JNDI), localHashtable);
+                new JMXServiceURL(Util.PROTOCOL_T3, host, Integer.valueOf(port), Util.JNDI), localHashtable);
 
             return this.connector.getMBeanServerConnection();
         }

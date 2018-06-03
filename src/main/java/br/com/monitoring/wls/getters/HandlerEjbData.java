@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import br.com.monitoring.wls.writers.Writer;
 import br.com.monitoring.wls.utils.MonitoringType;
 import br.com.monitoring.wls.utils.Util;
-import br.com.monitoring.wls.utils.Constant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,13 +24,16 @@ public class HandlerEjbData implements Getter {
     private static final MonitoringType type = MonitoringType.EJB_DATA;
 
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
+        logger.debug("call execute, connection:{} - writer:{}", connection, writer);
 
-        for (ObjectName serverRuntime : getServerRuntimes(connection)) {
-            
-            try{
+        for (ObjectName serverRuntime : Util.getServerRuntimes(connection)) {
 
-                String name = (String) connection.getAttribute(serverRuntime, "Name");
-                String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");    
+            try {
+
+                Object name = connection.getAttribute(serverRuntime, "Name");
+                Object adress = connection.getAttribute(serverRuntime, "ListenAddress");
+                Object port = connection.getAttribute(serverRuntime, "ListenPort");
+                Object domain = connection.getDefaultDomain();
 
                 ObjectName[] applicationRuntimeArray = (ObjectName[]) connection.getAttribute(serverRuntime,
                         "ApplicationRuntimes");
@@ -50,16 +52,22 @@ public class HandlerEjbData implements Getter {
 
                             for (ObjectName ejbRuntime : ejbRuntimeArray) {
 
-                                ObjectName poolRuntime = (ObjectName) connection.getAttribute(ejbRuntime, "PoolRuntime");
+                                ObjectName poolRuntime = (ObjectName) connection.getAttribute(ejbRuntime,
+                                        "PoolRuntime");
 
-                                Map<String,Object> result = new HashMap<String,Object>();
-                    
-                                result.put("Name",name);
-                                result.put("ListenAddress",adress);
-                                result.put("NameApplicationRuntime",nameApp);
-                                
+                                Map<String, Object> result = new HashMap<>();
+                                result.put("type", type.toString().toLowerCase());
+
+                                result.put("Domain", domain);
+
+                                result.put("Name", name);
+                                result.put("ListenAddress", adress);
+                                result.put("ListenPort", port);
+
+                                result.put("NameApplicationRuntime", nameApp);
+
                                 result.putAll(Util.getInfo(connection, poolRuntime, type));
-                
+
                                 writer.execute(result);
                             }
                         }
@@ -68,21 +76,17 @@ public class HandlerEjbData implements Getter {
             } catch (InstanceNotFoundException e) {
                 logger.warn("Error on process:{}", e.getMessage());
 
-                Map<String,Object> result = new HashMap<String,Object>();
-
+                Map<String, Object> result = new HashMap<>();
+                result.put("type", type.toString().toLowerCase());
                 result.put("errorMessage", e.getMessage());
 
-                writer.execute(result);                
+                writer.execute(result);
             }
         }
     }
 
-    private ObjectName[] getServerRuntimes(MBeanServerConnection connection) throws Exception {
-        return (ObjectName[]) connection.getAttribute(Constant.SERVICE, "ServerRuntimes");
+    @Override
+    public MonitoringType type() {
+        return type;
     }
-
-	@Override
-	public MonitoringType type() {
-		return type;
-	}
 }

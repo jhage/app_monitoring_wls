@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import br.com.monitoring.wls.utils.MonitoringType;
 import br.com.monitoring.wls.utils.Util;
 import br.com.monitoring.wls.writers.Writer;
-import br.com.monitoring.wls.utils.Constant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,14 +23,16 @@ public class HandlerJmsRuntime implements Getter {
 
     private static final MonitoringType type = MonitoringType.JMS_SERVER;
 
-    public void execute(MBeanServerConnection connection, Writer writer) throws Exception {        
+    public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
 
-        for (ObjectName serverRuntime : getServerRuntimes(connection)) {
-            
-            try{
+        for (ObjectName serverRuntime : Util.getServerRuntimes(connection)) {
 
-                String name = (String) connection.getAttribute(serverRuntime, "Name");
-                String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");
+            try {
+
+                Object name = connection.getAttribute(serverRuntime, "Name");
+                Object adress = connection.getAttribute(serverRuntime, "ListenAddress");
+                Object port = connection.getAttribute(serverRuntime, "ListenPort");
+                Object domain = connection.getDefaultDomain();
 
                 ObjectName jmsRuntime = (ObjectName) connection.getAttribute(serverRuntime, "JMSRuntime");
                 ObjectName[] jmsServerArray = (ObjectName[]) connection.getAttribute(jmsRuntime, "JMSServers");
@@ -42,11 +43,16 @@ public class HandlerJmsRuntime implements Getter {
                     for (ObjectName destination : destinationArray) {
                         String nameJMS = (String) connection.getAttribute(jmsServer, "Name");
 
-                        Map<String,Object> result = new HashMap<String,Object>();
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("type", type.toString().toLowerCase());
 
-                        result.put("Name",name);
-                        result.put("ListenAddress",adress);                    
-                        result.put("NameJMS",nameJMS);
+                        result.put("Domain", domain);
+
+                        result.put("Name", name);
+                        result.put("ListenAddress", adress);
+                        result.put("ListenPort",port);
+
+                        result.put("NameJMS", nameJMS);
 
                         result.putAll(Util.getInfo(connection, destination, type));
 
@@ -56,8 +62,8 @@ public class HandlerJmsRuntime implements Getter {
             } catch (InstanceNotFoundException e) {
                 logger.warn("Error on process:{}", e.getMessage());
 
-                Map<String,Object> result = new HashMap<String,Object>();
-
+                Map<String, Object> result = new HashMap<>();
+                result.put("type", type.toString().toLowerCase());
                 result.put("errorMessage", e.getMessage());
 
                 writer.execute(result);
@@ -65,12 +71,8 @@ public class HandlerJmsRuntime implements Getter {
         }
     }
 
-    private ObjectName[] getServerRuntimes(MBeanServerConnection connection) throws Exception {
-        return (ObjectName[]) connection.getAttribute(Constant.SERVICE, "ServerRuntimes");
+    @Override
+    public MonitoringType type() {
+        return type;
     }
-    
-	@Override
-	public MonitoringType type() {
-		return type;
-	}
 }

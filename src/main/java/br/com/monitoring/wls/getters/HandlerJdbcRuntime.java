@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import br.com.monitoring.wls.utils.MonitoringType;
 import br.com.monitoring.wls.utils.Util;
 import br.com.monitoring.wls.writers.Writer;
-import br.com.monitoring.wls.utils.Constant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,33 +25,41 @@ public class HandlerJdbcRuntime implements Getter {
 
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
 
-        ObjectName domain = getDomainConfiguration(connection);
-        for (ObjectName servers : (ObjectName[]) connection.getAttribute(domain, "Servers")) {
+        ObjectName domainConfiguration = Util.getDomainConfiguration(connection);
 
-            try{
+        for (ObjectName servers : (ObjectName[]) connection.getAttribute(domainConfiguration, "Servers")) {
 
-                Object name =  connection.getAttribute(servers, "Name");
+            try {
+
+                Object name = connection.getAttribute(servers, "Name");
                 Object adress = connection.getAttribute(servers, "ListenAddress");
+                Object port = connection.getAttribute(servers, "ListenPort");
+                Object domain = connection.getDefaultDomain();
 
                 ObjectName[] objectNameArray = (ObjectName[]) connection.getAttribute(new ObjectName("com.bea:Name="
-                + name + ",ServerRuntime=" + name + ",Location=" + name + ",Type=JDBCServiceRuntime"),
-                "JDBCDataSourceRuntimeMBeans");
+                        + name + ",ServerRuntime=" + name + ",Location=" + name + ",Type=JDBCServiceRuntime"),
+                        "JDBCDataSourceRuntimeMBeans");
 
                 for (ObjectName objectName : objectNameArray) {
 
-                    Map<String,Object> result = new HashMap<String,Object>();
-                
-                    result.put("Name",name);
-                    result.put("ListenAddress",adress);
-                    
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("type", type.toString().toLowerCase());
+
+                    result.put("Domain", domain);
+        
+                    result.put("Name", name);
+                    result.put("ListenAddress", adress);
+                    result.put("ListenPort", port);
+
                     result.putAll(Util.getInfo(connection, objectName, type));
-    
+
                     writer.execute(result);
-                }    
+                }
             } catch (InstanceNotFoundException e) {
                 logger.warn("Error on process:{}", e.getMessage());
 
-                Map<String,Object> result = new HashMap<String,Object>();
+                Map<String, Object> result = new HashMap<>();
+                result.put("type", type.toString().toLowerCase());
 
                 result.put("errorMessage", e.getMessage());
 
@@ -61,12 +68,8 @@ public class HandlerJdbcRuntime implements Getter {
         }
     }
 
-    private ObjectName getDomainConfiguration(MBeanServerConnection connection) throws Exception {
-        return (ObjectName) connection.getAttribute(Constant.SERVICE, "DomainConfiguration");
+    @Override
+    public MonitoringType type() {
+        return type;
     }
-    
-	@Override
-	public MonitoringType type() {
-		return type;
-	}
 }

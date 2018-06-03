@@ -44,7 +44,9 @@ public enum MonitoringType {
                                         "Incremental", "Generational", "GCHandlesCompaction" }),
 
         JMS_SERVER("JMSServerRuntime", new String[] { "Name", "MessagesCurrentCount", "MessagesPendingCount",
-                        "MessagesHighCount", "MessagesReceivedCount" });
+                        "MessagesHighCount", "MessagesReceivedCount" }),
+
+        SERVER_RUNTIME("ServerRuntimes", new String[] { "Name", "ListenAddress", "State", "OpenSocketsCurrentCount" });        
 
         public String[] strArray;
 

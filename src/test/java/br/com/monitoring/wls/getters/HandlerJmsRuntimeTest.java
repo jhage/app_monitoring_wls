@@ -35,7 +35,7 @@ public class HandlerJmsRuntimeTest{
 
 			@Override
 			public void execute(Map<String, Object> map) throws Exception {
-                logger.info("content data map:{}",map);				
+                logger.info("content data map:{}",map);
 			}
         });
     }

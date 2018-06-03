@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import weblogic.management.runtime.ExecuteThread;
 
 import br.com.monitoring.wls.writers.Writer;
-import br.com.monitoring.wls.utils.Constant;
 import br.com.monitoring.wls.utils.MonitoringType;
+import br.com.monitoring.wls.utils.Util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,11 +27,13 @@ public class HandlerThreadPool implements Getter {
 
     public void execute(MBeanServerConnection connection, Writer writer) throws Exception {
 
-        for (ObjectName serverRuntime : getServerRuntimes(connection)) {
+        for (ObjectName serverRuntime : Util.getServerRuntimes(connection)) {
 
             try {
-                String name = (String) connection.getAttribute(serverRuntime, "Name");
-                String adress = (String) connection.getAttribute(serverRuntime, "ListenAddress");    
+                Object name = connection.getAttribute(serverRuntime, "Name");
+                Object adress = connection.getAttribute(serverRuntime, "ListenAddress");
+                Object port = connection.getAttribute(serverRuntime, "ListenPort");
+                Object domain = connection.getDefaultDomain();
 
                 ObjectName threadPoolRuntime = (ObjectName) connection.getAttribute(serverRuntime, "ThreadPoolRuntime");
 
@@ -39,10 +41,14 @@ public class HandlerThreadPool implements Getter {
 
                 for (ExecuteThread executeThread : arr) {
 
-                    Map<String, Object> result = new HashMap<String, Object>();
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("type", type.toString().toLowerCase());
+
+                    result.put("Domain", domain);
 
                     result.put("Name", name);
                     result.put("ListenAddress", adress);
+                    result.put("ListenPort", port);
 
                     result.put("nameThread", executeThread.getName());
                     result.put("ModuleName", executeThread.getModuleName());
@@ -55,17 +61,13 @@ public class HandlerThreadPool implements Getter {
             } catch (InstanceNotFoundException e) {
                 logger.warn("Error on process:{}", e.getMessage());
 
-                Map<String, Object> result = new HashMap<String, Object>();
-                
+                Map<String, Object> result = new HashMap<>();
+                result.put("type", type.toString().toLowerCase());
                 result.put("errorMessage", e.getMessage());
 
                 writer.execute(result);
             }
         }
-    }
-
-    private ObjectName[] getServerRuntimes(MBeanServerConnection connection) throws Exception {
-        return (ObjectName[]) connection.getAttribute(Constant.SERVICE, "ServerRuntimes");
     }
 
     @Override
