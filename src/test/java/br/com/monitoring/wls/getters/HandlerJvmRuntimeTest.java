@@ -3,6 +3,8 @@ package br.com.monitoring.wls.getters;
 import javax.management.MBeanServerConnection;
 
 import java.util.Map;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import br.com.monitoring.wls.writers.Writer;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=HandlerJvmRuntime.class)
 @ContextConfiguration(classes=ApplicationTest.class)
+@Ignore
 public class HandlerJvmRuntimeTest{
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationTest.class);

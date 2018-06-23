@@ -7,6 +7,8 @@ import br.com.monitoring.wls.getters.HandlerThreadDump;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={HandlerWriteElk.class,HandlerThreadDump.class})
 @ContextConfiguration(classes=ApplicationTest.class)
+@Ignore
 public class HandlerWriteElkTest{
 
     private static final Logger logger = LoggerFactory.getLogger(HandlerWriteElkTest.class);

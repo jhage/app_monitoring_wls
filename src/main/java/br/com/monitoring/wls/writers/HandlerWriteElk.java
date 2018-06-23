@@ -16,10 +16,12 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@Qualifier("HandlerELK")
 public class HandlerWriteElk implements Writer {
 
     private static final Logger logger = LoggerFactory.getLogger(HandlerWriteElk.class);
@@ -34,47 +36,52 @@ public class HandlerWriteElk implements Writer {
     private Socket socket;
 
     private DataOutputStream os;
+    
+    private Map<String, Object> writeElK;
 
     @PostConstruct
-    public void init() throws IOException {
-        logger.debug("call init");
-
-        this.socket = new Socket(socketHost, socketPort);
-        this.os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+    public void init(){
+        
+    	try {
+    		
+    		 this.socket = new Socket(socketHost, socketPort);
+    	     this.os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+    	     logger.debug("call init");
+    	}catch (IOException e) {
+    		logger.error("Erro ao Conectar ao ELK");
+		}
     }
 
     public void execute(Map<String, Object> map) throws Exception {
-        logger.debug("call execute, map:" + map);
-
+    	
+    	logger.debug("call execute, map:" + map);
         logger.debug("Just connected to " + socket.getRemoteSocketAddress());
-
-        Map<String, Object> result = new HashMap<String, Object>();
-
-        result.put("timestamp", Util.formatDate(new Date()));
-
-        for (String key : map.keySet()) {
-
-            result.put(key.toLowerCase(), map.get(key));
-        }
-
-        this.write(result);
+        writeElK = new HashMap<String, Object>();
+        writeElK.put("timestamp", Util.formatDate(new Date()));
+        map.keySet().forEach(key ->  writeElK.put(key.toLowerCase(), map.get(key)));
+        this.write();
     }
 
-    private void write(Map<String, Object> map) throws IOException {
-        logger.debug("call write, map:" + map);
+    private void write() throws IOException {
+        logger.debug("call write, map:" + this.writeElK);
 
         logger.debug("Just connected to " + socket.getRemoteSocketAddress());
 
-        this.os.writeBytes(new Gson().toJson(map) + this.lineSeparator);
+        this.os.writeBytes(new Gson().toJson(this.writeElK) + this.lineSeparator);
     }
 
     @PreDestroy
-    public void close() throws IOException {
-        logger.debug("call close");
-
-        if (this.socket != null) {
-            this.os.flush();
-            this.socket.close();
-        }
+    public void close() {
+        
+    	try {
+	    	logger.debug("call close");
+	        
+	        if (this.socket != null) {
+	            this.os.flush();
+	            this.socket.close();
+	        }
+    	}catch (Exception e) {
+    		logger.error("Erro ao desconectar ao ELK");
+		}
     }
 }

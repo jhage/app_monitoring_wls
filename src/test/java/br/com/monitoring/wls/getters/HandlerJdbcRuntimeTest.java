@@ -1,5 +1,6 @@
 package br.com.monitoring.wls.getters;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import javax.management.MBeanServerConnection;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes=HandlerJdbcRuntime.class)
 @ContextConfiguration(classes=ApplicationTest.class)
+@Ignore
 public class HandlerJdbcRuntimeTest{
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationTest.class);
